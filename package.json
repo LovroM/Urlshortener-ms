@@ -1,0 +1,13 @@
+{
+  "name": "urlshortener-ms",
+  "version": "0.0.0",
+  "description": "URL Shortener Microservice API Free code camp Node project",
+  "main": "server.js",
+  "repository": "https://github.com/LovroM/Urlshortener-ms.git",
+  "author": "LovroM",
+  "dependencies": {
+    "async": "~0.2.8",
+    "express": "~3.2.4",
+    "socket.io": "~0.9.14"
+  }
+}
