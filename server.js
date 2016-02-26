@@ -2,29 +2,54 @@ var express = require('express');
 var app = express();
 var path = require("path");
 var mongo = require("mongodb").MongoClient;
-var mongoUrl = "mongodb://localhost:27017/links"
+//var mongoUrl = "mongodb://localhost:27017/links"
+var mongoUrl = "mongodb://admin:admin@ds055945.mlab.com:55945/fcc-projects";
+
+
+mongo.connect(mongoUrl)
 
 
 /**************** Display homepage ******************/
+
 app.get('/', function(req, res) {
     res.sendfile(path.join(__dirname, '/client', '/index.html'));
 });
 
 
+
+/*************** Create new short link **************/
+
 app.get(/new\/(.+)/, function(req, res) {
 
     var new_id = req.params[0];
-
+    var responseObj = {};
+    
     console.log("requested: " + new_id);
 
-    var responseObj = {};
-
+    /** Checks if the url is in right format **/
     if (/(https?:\/\/\w+\.\w+.+)/.test(new_id)) {
 
-
         mongo.connect(mongoUrl, function(error, db) {
-            if (error) console.log("failed to connect to db. Error: " + error);
-
+            if (error) console.log(error);
+            
+            function createNewShortUrl() 
+            {
+                //create new,  db.links.find().count()
+                db.collection("links").find().count(function(error, count) 
+                {
+                    var newLink = 
+                    {
+                        "original_url": new_id, "short_url": count + 1 
+                    }
+                    db.collection("links").insert(newLink);
+                    res.send({
+                        "original_url": new_id,
+                        "short_url": "https://fcc-urlshortener-api-ms.herokuapp.com/" + (count + 1)
+                    });
+                });
+                
+            }
+            
             db.collection("links").find(
             {
                 "original_url": new_id
@@ -36,13 +61,14 @@ app.get(/new\/(.+)/, function(req, res) {
                 
                 if (urlObj[0] == undefined)
                 {
-                    //create new,  db.links.find().count()
+                    createNewShortUrl();
                 }
                 else
                 {
                     responseObj = 
                     {
-                        "original_url": new_id , "short_url": "heroku/" + urlObj[0].short_url
+                        "original_url": new_id ,
+                        "short_url": "https://fcc-urlshortener-api-ms.herokuapp.com/" + urlObj[0].short_url
                     };
    
                     res.send(responseObj);
@@ -61,12 +87,11 @@ app.get(/new\/(.+)/, function(req, res) {
         res.send(responseObj);
     }
 
-    //var responseObj = { "original_url": "https://www.google.com", "short_url": 1 };
-    //res.end();
-    //res.send(responseObj);
 });
 
+
 /**************** Short url redirect ****************/
+
 app.get(/(\d+)/, function(req, res) {
     var short_id = req.params[0];
     
@@ -100,6 +125,7 @@ app.get(/(\d+)/, function(req, res) {
     });
         
 });
+
 
 
 var port = process.env.PORT || 8080;
