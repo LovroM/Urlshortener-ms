@@ -6,8 +6,6 @@ var mongo = require("mongodb").MongoClient;
 var mongoUrl = "mongodb://admin:admin@ds055945.mlab.com:55945/fcc-projects";
 
 
-mongo.connect(mongoUrl)
-
 
 /**************** Display homepage ******************/
 
